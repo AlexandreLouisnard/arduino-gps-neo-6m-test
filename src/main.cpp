@@ -19,8 +19,9 @@
 // #define ARDUINO_NANO
 #define STM32
 
-
 #include <Arduino.h>
+#include <TinyGPS++.h>
+
 #ifdef ARDUINO_NANO
 #include <SoftwareSerial.h>
 #endif
@@ -29,11 +30,15 @@
 SoftwareSerial gpsSerial(2, 3); // create gps sensor connection
 #endif
 
+TinyGPSPlus gps;
+
+long t = 0;
+
 void setup()
 {
   Serial.begin(9600);
   delay(3000);
-  Serial.println("setup start");
+  Serial.println("setup start1");
 
 #ifdef ARDUINO_NANO
   gpsSerial.begin(9600);
@@ -54,6 +59,7 @@ void loop()
     // get the byte data from the GPS
     byte gpsData = gpsSerial.read();
     Serial.write(gpsData);
+    gps.encode(gpsData);
   }
 #endif
 
@@ -62,7 +68,34 @@ void loop()
   {
     // get the byte data from the GPS
     byte gpsData = Serial1.read();
-    Serial.write(gpsData);
+    // Serial.write(gpsData);
+    gps.encode(gpsData);
   }
 #endif
+
+  if (gps.altitude.isUpdated())
+  {
+    Serial.print("ALT=");
+    Serial.println(gps.altitude.meters());
+  }
+
+  if (gps.location.isUpdated())
+  {
+    Serial.print("LAT=");
+    Serial.println(gps.location.lat(), 6);
+    Serial.print("LNG=");
+    Serial.println(gps.location.lng(), 6);
+  }
+
+  // if (millis() > t + 1000)
+  // {
+  //   Serial.println("////////////");
+  //   Serial.print("SAT=");
+  //   Serial.println(gps.satellites.value());
+  //   Serial.print("LAT=");
+  //   Serial.println(gps.location.lat(), 6);
+  //   Serial.print("LNG=");
+  //   Serial.println(gps.location.lng(), 6);
+  //   t = millis();
+  // }
 }
