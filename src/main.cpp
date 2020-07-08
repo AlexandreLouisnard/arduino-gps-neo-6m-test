@@ -1,13 +1,13 @@
 /**
  * 1. WIRING
  *  * Arduino Nano :
- *    - Neo-6M
+ *    - Neo-6M/7M
  *     - Vcc : Arduino +5V
- *      - GND : Arduino GND
+ *     - GND : Arduino GND
  *     - RXD : Arduino D2
  *     - TXD : Arduino D3 (WARNING : logical level for Neo-6M should be 3V, not 5V. Otherwise do not connect)
  *  * STM32duino :
- *   - Neo-6M
+ *   - Neo-6M/7M
  *     - Vcc : STM32 +3.3V
  *     - GND : STM32 GND
  *     - RXD : STM32 A9
@@ -30,7 +30,8 @@
 SoftwareSerial gpsSerial(2, 3); // create gps sensor connection
 #endif
 
-TinyGPSPlus gps;
+TinyGPSPlus g_gps;
+TinyGPSCustom satsInView(g_gps, "GPGSV", 3);
 
 long t = 0;
 
@@ -68,34 +69,39 @@ void loop()
   {
     // get the byte data from the GPS
     byte gpsData = Serial1.read();
-    // Serial.write(gpsData);
-    gps.encode(gpsData);
+    Serial.write(gpsData);
+    g_gps.encode(gpsData);
   }
 #endif
 
-  if (gps.altitude.isUpdated())
+  if (g_gps.altitude.isUpdated())
   {
-    Serial.print("ALT=");
-    Serial.println(gps.altitude.meters());
+    Serial.println("altitude.isUpdated()");
   }
 
-  if (gps.location.isUpdated())
+  if (g_gps.location.isUpdated())
   {
+    Serial.println("location.isUpdated()");
+  }
+
+  if (millis() > t + 1000)
+  {
+    Serial.println("// GPS//////////");
+    Serial.print("Checksum passed/failed=");
+    Serial.print(g_gps.passedChecksum());
+    Serial.print("/");
+    Serial.println(g_gps.failedChecksum());
+    Serial.print("SAT=");
+    Serial.print(g_gps.satellites.value());
+    Serial.print("/");
+    Serial.println(atoi(satsInView.value()));
     Serial.print("LAT=");
-    Serial.println(gps.location.lat(), 6);
+    Serial.println(g_gps.location.lat(), 6);
     Serial.print("LNG=");
-    Serial.println(gps.location.lng(), 6);
+    Serial.println(g_gps.location.lng(), 6);
+    Serial.print("ALT=");
+    Serial.println(g_gps.altitude.meters());
+    Serial.println("////////////");
+    t = millis();
   }
-
-  // if (millis() > t + 1000)
-  // {
-  //   Serial.println("////////////");
-  //   Serial.print("SAT=");
-  //   Serial.println(gps.satellites.value());
-  //   Serial.print("LAT=");
-  //   Serial.println(gps.location.lat(), 6);
-  //   Serial.print("LNG=");
-  //   Serial.println(gps.location.lng(), 6);
-  //   t = millis();
-  // }
 }
