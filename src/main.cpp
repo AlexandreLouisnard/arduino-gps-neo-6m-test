@@ -69,19 +69,19 @@ void loop()
   {
     // get the byte data from the GPS
     byte gpsData = Serial1.read();
-    Serial.write(gpsData);
+    // Serial.write(gpsData);
     g_gps.encode(gpsData);
   }
 #endif
 
   if (g_gps.altitude.isUpdated())
   {
-    Serial.println("altitude.isUpdated()");
+    // Serial.println("altitude.isUpdated()");
   }
 
   if (g_gps.location.isUpdated())
   {
-    Serial.println("location.isUpdated()");
+    // Serial.println("location.isUpdated()");
   }
 
   if (millis() > t + 1000)
@@ -95,6 +95,10 @@ void loop()
     Serial.print(g_gps.satellites.value());
     Serial.print("/");
     Serial.println(atoi(satsInView.value()));
+    Serial.print("time=");
+    Serial.println(g_gps.time.value());
+    Serial.print("age=");
+    Serial.println(g_gps.location.age());
     Serial.print("LAT=");
     Serial.println(g_gps.location.lat(), 6);
     Serial.print("LNG=");
